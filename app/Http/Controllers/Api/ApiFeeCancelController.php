@@ -19,17 +19,17 @@ class ApiFeeCancelController extends Controller
     public function index()
     {
         try {
-            $feeCancels = $this->database->getReference('feeCancels')->getValue();
+            $feeCancels = $this->database->getReference('fee_cancels')->getValue();
 
             return response()->json([
                 'success' => true,
-                'message' => 'Data berhasil diload',
-                'data' => $feeCancels,
+                'message' => 'Data retrieved successfully!',
+                'data' => $feeCancels ?? [],
             ], 200);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to load data: ' . $e->getMessage(),
+                'message' => 'Failed to retrieve data: ' . $e->getMessage(),
             ], 500);
         }
     }
@@ -38,21 +38,19 @@ class ApiFeeCancelController extends Controller
     {
         try {
             $request->validate([
-                'user_id' => 'required',
-                'fee' => 'required',
-                'nama_lengkap' => 'required'
+                'fee' => 'required|numeric',
+                'user_id' => 'required|string',
+                'user_name' => 'required|string',
             ]);
 
             $data = $request->all();
-            $newPostKey = $this->database->getReference('feeCancels')->push()->getKey();
-            $this->database->getReference('feeCancels/' . $newPostKey)->set($data);
-
-            $feeCancel = $this->database->getReference('feeCancels/' . $newPostKey)->getValue();
+            $newReference = $this->database->getReference('fee_cancels')->push();
+            $newReference->set($data);
 
             return response()->json([
                 'success' => true,
-                'message' => 'Data berhasil disimpan',
-                'data' => $feeCancel,
+                'message' => 'Data added successfully',
+                'data' => $newReference->getValue(),
             ], 200);
         } catch (ValidationException $e) {
             return response()->json([
@@ -63,7 +61,7 @@ class ApiFeeCancelController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to store data: ' . $e->getMessage(),
+                'message' => 'Failed to add data: ' . $e->getMessage(),
             ], 500);
         }
     }
@@ -71,18 +69,18 @@ class ApiFeeCancelController extends Controller
     public function show($id)
     {
         try {
-            $feeCancel = $this->database->getReference('feeCancels/' . $id)->getValue();
+            $reference = $this->database->getReference('fee_cancels/' . $id);
+            $feeCancel = $reference->getValue();
 
-            if ($feeCancel === null) {
-                return response()->json(['message' => 'Fee cancel not found'], 404);
+            if (!$feeCancel) {
+                return response()->json(['message' => 'Data not found'], 404);
             }
 
             return response()->json([
-                'id' => $id,
-                'fee' => $feeCancel['fee'] ?? '',
-                'nama_lengkap' => $feeCancel['nama_lengkap'] ?? '',
-                'user_id' => $feeCancel['user_id'] ?? '',
-            ]);
+                'success' => true,
+                'message' => 'Data retrieved successfully',
+                'data' => array_merge(['id' => $id], $feeCancel),
+            ], 200);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Failed to retrieve data: ' . $e->getMessage(),
@@ -94,20 +92,19 @@ class ApiFeeCancelController extends Controller
     {
         try {
             $request->validate([
-                'user_id' => 'required|integer',
                 'fee' => 'required|numeric',
-                'nama_lengkap' => 'required|string',
+                'user_id' => 'required|string',
+                'user_name' => 'required|string',
             ]);
 
-            $data = $request->only(['user_id', 'fee', 'nama_lengkap']);
-            $reference = $this->database->getReference('feeCancels/' . $id);
+            $data = $request->only(['fee', 'user_id', 'user_name']);
+            $reference = $this->database->getReference('fee_cancels/' . $id);
             $reference->update($data);
 
-            $feeCancel = $reference->getValue();
-
             return response()->json([
-                'message' => 'Data berhasil diperbarui',
-                'data' => $feeCancel,
+                'success' => true,
+                'message' => 'Data updated successfully',
+                'data' => $reference->getValue(),
             ], 200);
         } catch (ValidationException $e) {
             return response()->json([
@@ -124,26 +121,23 @@ class ApiFeeCancelController extends Controller
     public function destroy($id)
     {
         try {
-            $reference = $this->database->getReference('feeCancels/' . $id);
-            $feeCancel = $reference->getValue();
-
-            if ($feeCancel) {
+            $reference = $this->database->getReference('fee_cancels/' . $id);
+            if ($reference->getValue()) {
                 $reference->remove();
-
                 return response()->json([
-                    'status' => 'success',
-                    'message' => 'Fee Cancel berhasil dihapus',
+                    'success' => true,
+                    'message' => 'Data deleted successfully',
                 ], 200);
             } else {
                 return response()->json([
-                    'status' => 'error',
-                    'message' => 'Fee Cancel tidak ditemukan',
+                    'success' => false,
+                    'message' => 'Data not found',
                 ], 404);
             }
         } catch (\Exception $e) {
             return response()->json([
-                'status' => 'error',
-                'message' => 'Failed to delete Fee Cancel: ' . $e->getMessage(),
+                'success' => false,
+                'message' => 'Failed to delete data: ' . $e->getMessage(),
             ], 500);
         }
     }

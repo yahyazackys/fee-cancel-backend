@@ -1,7 +1,8 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\ApiFeeCancelController;
+use App\Http\Controllers\Api\ApiAuthController;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,6 +15,16 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+Route::prefix('fee-cancel')->group(function () {
+    Route::post('store', [ApiFeeCancelController::class, 'store'])->name('store');
+    Route::get('index', [ApiFeeCancelController::class, 'index'])->name('index');
+    Route::get('show/{id}', [ApiFeeCancelController::class, 'show'])->name('show');
+    Route::post('update/{id}', [ApiFeeCancelController::class, 'update'])->name('update');
+    Route::get('destroy/{id}', [ApiFeeCancelController::class, 'destroy'])->name('destroy');
+});
+
+Route::prefix('users')->group(function () {
+    Route::post('login', [ApiAuthController::class, 'login'])->name('login');
+    Route::post('register', [ApiAuthController::class, 'register'])->name('register');
+    Route::post('logout', [ApiAuthController::class, 'logout'])->name('logout');
 });
