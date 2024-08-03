@@ -101,7 +101,7 @@ Ikuti langkah-langkah berikut untuk menyiapkan proyek:
 
    
    
-4. **Konfigurasi Firebase (Jika tidak belum ada kredensial JSON di root proyek)**
+4. **Konfigurasi Firebase (Jika belum ada kredensial JSON di root proyek)**
 
 - **Unduh Kredensial Firebase:** Unduh file kredensial JSON dari Firebase Console dan simpan di direktori root proyek.
 - **Tambahkan Kredensial ke .env:** Tambahkan konfigurasi berikut ke file.
